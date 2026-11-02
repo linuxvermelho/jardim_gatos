@@ -1,0 +1,68 @@
+:root {
+      --charcoal: #2b1111;
+      --amber: #f59e0b;
+      --soviet-red: #b91c1c;
+    }
+    body {
+      background-color: #7f1d1d;
+      background-image: 
+        radial-gradient(circle, rgba(251, 191, 36, 0.22) 1.5px, transparent 1.5px),
+        linear-gradient(to right, rgba(251, 191, 36, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(251, 191, 36, 0.08) 1px, transparent 1px);
+      background-size: 24px 24px, 24px 24px, 24px 24px;
+      font-family: 'Quicksand', sans-serif;
+      color: var(--charcoal);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .bg-paper-card, [class*="bg-paper-card"], .modal-card-bg {
+      background-color: #fff8ed !important;
+      opacity: 1 !important;
+    }
+    .bg-paper, [class*="bg-paper"] {
+      background-color: #f7ebd9 !important;
+      opacity: 1 !important;
+    }
+    .text-pencil { color: #2b1111 !important; }
+    .border-pencil { border-color: #2b1111 !important; }
+    .sketch-border {
+      border: 2.5px solid var(--charcoal);
+      box-shadow: 3px 4px 0 rgba(43, 17, 17, 0.92);
+    }
+    .sketch-btn {
+      border: 2px solid var(--charcoal);
+      box-shadow: 2px 3px 0 rgba(43, 17, 17, 0.95);
+      transition: all 0.15s ease-in-out;
+    }
+    .sketch-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0 1px 0 rgba(43, 17, 17, 0.95);
+    }
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.025, 0.98); }
+    }
+    @keyframes tailWag {
+      0% { transform: rotate(-6deg); }
+      50% { transform: rotate(5deg); }
+      100% { transform: rotate(-8deg); }
+    }
+    @keyframes naturalBlink {
+      0%, 94%, 98%, 100% { transform: scaleY(1); }
+      96% { transform: scaleY(0.08); }
+    }
+    .anim-body { animation: breathe 3.6s ease-in-out infinite; transform-origin: 100px 145px; }
+    .anim-tail { animation: tailWag 3.2s ease-in-out infinite alternate; transform-origin: 135px 150px; }
+    .anim-blink { animation: naturalBlink 4.2s infinite; transform-origin: 95px 95px; }
+    .cat-drop-target.drag-over {
+      transform: scale(1.06);
+      filter: drop-shadow(0 0 14px rgba(220, 38, 38, 0.85));
+    }
+    .stall-canopy {
+      background: repeating-linear-gradient(-45deg, #b91c1c, #b91c1c 16px, #fbbf24 16px, #fbbf24 32px);
+      border-bottom: 3px solid var(--charcoal);
+    }
+    .chat-scroll::-webkit-scrollbar { width: 6px; }
+    .chat-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.04); border-radius: 8px; }
+    .chat-scroll::-webkit-scrollbar-thumb { background: #b91c1c; border-radius: 8px; }
+    .touch-drag-item { touch-action: none !important; }

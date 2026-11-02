@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>União dos Camaradas Felinos ☭ Coletivo Proletário do Casal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/js/00-tailwind-config.js"></script>
+  <link rel="stylesheet" href="assets/css/base.css">
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-2 sm:p-5 overflow-x-hidden relative pb-28">
+
+  <canvas id="fx-canvas" class="fixed inset-0 pointer-events-none z-20"></canvas>
+
+  <header class="w-full max-w-4xl flex flex-wrap items-center justify-between gap-3 bg-[#fff8ed] bg-paper-card modal-card-bg p-3 sm:p-4 rounded-2xl sketch-border z-30 shadow-md border-t-4 border-t-red-700">
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-xl bg-red-700 border-2 border-pencil flex items-center justify-center text-2xl text-amber-300 shadow-sm">
+        ☭
+      </div>
+      <div>
+        <h1 class="font-caveat text-2xl sm:text-3xl font-bold leading-tight text-red-900">União dos Camaradas Felinos ☭</h1>
+        <p class="text-[11px] sm:text-xs text-pencil/80 font-bold flex items-center gap-1.5">
+          <span class="text-red-700">★ Coletivo Proletário do Casal •</span>
+          <span id="cloud-sync-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+          <span id="cloud-sync-status-text">Conectando ao Kremlin...</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Carteiras Salvas (Individual e Casal) + Vínculo -->
+    <div class="flex items-center gap-2 flex-wrap text-xs font-bold">
+      <div class="bg-amber-100/95 text-red-950 border-2 border-red-800 px-3 py-1.5 rounded-xl flex items-center gap-2.5 shadow-sm">
+        <span title="Peixes do Estado (Visuais)">🐟 <span id="wallet-fish-display">0</span></span>
+        <button onclick="claimDailyRewardManual()" title="Resgatar Ração Estatal Diária (1 por dia)" class="bg-red-700 hover:bg-red-800 text-amber-200 border border-pencil px-1.5 py-0.5 rounded text-[11px] sketch-btn">
+          🎁 Ração +1
+        </button>
+        <span title="Rublos Felinos (Comidas)">🐾 <span id="wallet-paws-display">0</span></span>
+        <span title="Medalhas do Partido (Metadinhas)" class="text-red-700 font-extrabold border-l-2 border-red-800/40 pl-2">☭💖 <span id="wallet-couple-display">0</span></span>
+      </div>
+
+      <!-- Badge de Conexão Diária (NFC / Código) -->
+      <button onclick="openSyncModal()" id="daily-lock-badge" class="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-amber-200 text-red-950 border-2 border-pencil flex items-center gap-1.5 sketch-btn">
+        <span id="daily-lock-icon">🔒</span>
+        <span id="daily-lock-text">Ponto do Sindicato ☭</span>
+      </button>
+
+      <button onclick="toggleMyIdentity()" class="sketch-btn bg-white hover:bg-amber-50 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1">
+        <span>🚩 Camarada:</span>
+        <span id="header-my-role-label" class="text-red-700">Camarada 1</span>
+      </button>
+
+      <button onclick="lockAndLogout()" title="Bloquear terminal com senha do Estado" class="sketch-btn bg-stone-100 hover:bg-stone-200 px-2 py-1.5 rounded-xl font-bold text-xs text-stone-800">
+        🔒 Sair
+      </button>
+
+      <button onclick="enableBrowserNotifications()" id="browser-notifications-btn" class="sketch-btn bg-amber-100 hover:bg-amber-200 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 text-red-950" title="Ativar alertas de telegramas do Comitê">
+        🔔 Alertas
+      </button>
+      <button onclick="openLetterModal()" class="sketch-btn bg-red-700 hover:bg-red-800 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 text-amber-100 relative">
+        <span>💌 Telegramas</span>
+        <span id="letters-count-pill" class="bg-amber-400 text-red-950 rounded-full text-[10px] px-1.5 py-0.2 font-black leading-tight ml-0.5 border border-pencil">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Toast de Notificações Rápidas -->
+  <div id="interaction-banner" class="opacity-0 transition-opacity duration-300 my-2 px-4 py-1.5 rounded-full bg-[#fff8ed] sketch-border text-sm font-hand text-lg text-red-800 font-bold flex items-center gap-2 z-30">
+    <span id="interaction-banner-text">Saudações Vermelhas, Camarada! ☭💖</span>
+  </div>
+
+  <main class="w-full max-w-4xl my-2 flex-1 flex flex-col justify-center items-center relative z-10">
+    <div class="w-full bg-[#f3dfc1] rounded-3xl sketch-border p-4 sm:p-6 relative overflow-hidden min-h-[420px] flex flex-col justify-between"
+         style="box-shadow: inset 0 0 45px rgba(185, 28, 28, 0.22), 4px 6px 0 #2b1111;">
+      
+      <!-- Ícones Decorativos da Praça Vermelha -->
+      <div class="absolute top-4 left-6 opacity-25 text-3xl select-none text-red-800">☭</div>
+      <div class="absolute top-12 right-10 opacity-30 text-3xl select-none text-amber-600">⭐</div>
+      <div class="absolute bottom-6 left-12 opacity-30 text-2xl select-none">🌾</div>
+      <div class="absolute bottom-10 right-20 opacity-30 text-2xl select-none">🚩</div>
+
+      <!-- Consciência de Classe no centro + Planos Quinquenais -->
+      <div class="w-full flex flex-col sm:flex-row items-center justify-center gap-3 mb-2">
+        <div class="bg-[#fff8ed]/95 backdrop-blur-sm sketch-border px-3.5 py-1.5 rounded-2xl flex items-center gap-2 text-xs font-bold cursor-pointer hover:bg-amber-50" onclick="openPartnerProfileModal()">
+          <span class="text-lg">🔥</span>
+          <span id="header-streak-badge" class="text-red-900">1 Dia de Plano Quinquenal</span>
+          <span class="text-[10px] text-red-700 font-extrabold">▶ Diário do Partido 📖</span>
+        </div>
+
+        <div class="bg-[#fff8ed]/95 backdrop-blur-sm sketch-border px-4 py-1.5 rounded-2xl flex items-center gap-3">
+          <span class="text-xl text-red-700 font-black">☭</span>
+          <div class="flex flex-col">
+            <div class="flex justify-between items-center text-xs font-bold gap-4 text-red-950">
+              <span>Consciência de Classe do Casal ☭</span>
+              <span id="love-percent-text">85%</span>
+            </div>
+            <div class="w-36 sm:w-48 bg-stone-200 h-2.5 rounded-full border border-pencil overflow-hidden mt-1">
+              <div id="love-progress-bar" class="bg-gradient-to-r from-red-700 via-red-600 to-amber-400 h-full w-[85%] transition-all duration-500"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Área dos Dois Gatos Camaradas -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full my-auto items-center">
+        <!-- CAMARADA 1 -->
+        <div id="cat1-container-box" class="flex flex-col items-center group relative p-3 rounded-2xl bg-[#fff8ed]/55 backdrop-blur-[2px] border-2 border-red-900/20 transition-all"
+             ondragover="handleCatDragOver(event)"
+             ondragenter="handleCatDragOver(event)"
+             ondragleave="handleCatDragLeave(event)"
+             ondrop="handleCatDrop('cat1', event)">
+          <div class="absolute -top-3 bg-amber-400 text-red-950 font-bold text-xs px-3 py-0.5 rounded-full sketch-border z-10 flex items-center gap-1">
+            <span>⭐</span>
+            <span id="cat1-title-label">Camarada 1</span>
+            <span id="cat1-tag-role" class="text-[10px] bg-white/80 px-1 rounded">(Você)</span>
+          </div>
+
+          <div id="speech-cat1" onclick="openLetterModal()" title="Toque para ler os Telegramas do Comitê" 
+               class="mb-2 px-3 py-1 rounded-2xl bg-[#fff8ed] sketch-border text-xs sm:text-sm font-hand max-w-[210px] text-center transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95 shadow-sm">
+            Trabalhando pelo nosso amor... ☭🐾
+          </div>
+
+          <div id="cat1-drop-area" class="cat-drop-target w-44 h-44 sm:w-52 sm:h-52 cursor-pointer relative transition-transform duration-200 rounded-2xl"
+               onclick="handleCatInteraction('cat1', event)"
+               ondragover="handleCatDragOver(event)"
+               ondragenter="handleCatDragOver(event)"
+               ondragleave="handleCatDragLeave(event)"
+               ondrop="handleCatDrop('cat1', event)"
+               title="Toque para saudação camarada ou solte ração aqui!">
+            <div id="cat1-svg-mount" class="w-full h-full"></div>
+            <span class="absolute bottom-1 right-2 text-[10px] bg-[#fff8ed]/95 px-2 py-0.5 rounded-full border border-pencil/60 text-red-950 font-bold">
+              Carinho / Ração Estatal 🐟
+            </span>
+
+            <div id="cat1-locked-overlay" class="hidden absolute inset-0 bg-red-950/75 backdrop-blur-[2px] rounded-2xl flex flex-col items-center justify-center text-center p-3 text-amber-100 border-2 border-dashed border-amber-400">
+              <span class="text-3xl mb-1">💤☭</span>
+              <span class="text-xs font-bold leading-tight">Camarada em repouso sindical!</span>
+              <button onclick="openSyncModal()" class="mt-2 text-[11px] bg-red-700 hover:bg-red-600 text-amber-200 border border-amber-300 px-2.5 py-1 rounded-lg font-bold shadow">
+                Bater Ponto do Sindicato ☭
+              </button>
+            </div>
+          </div>
+
+          <div class="w-full max-w-[220px] bg-[#fff8ed]/95 p-2.5 rounded-xl sketch-border mt-2 space-y-1.5 text-xs font-semibold">
+            <div class="flex justify-between items-center">
+              <span>Ração 🐟</span>
+              <div class="w-24 bg-stone-200 h-2 rounded-full border border-pencil overflow-hidden">
+                <div id="cat1-hunger-bar" class="h-full bg-amber-500 w-[75%] transition-all"></div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center">
+              <span>Vigor Operário ⚡</span>
+              <div class="w-24 bg-stone-200 h-2 rounded-full border border-pencil overflow-hidden">
+                <div id="cat1-energy-bar" class="h-full bg-blue-600 w-[80%] transition-all"></div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center">
+              <span>Moral Revolucionária ☭</span>
+              <div class="w-24 bg-stone-200 h-2 rounded-full border border-pencil overflow-hidden">
+                <div id="cat1-happy-bar" class="h-full bg-red-600 w-[90%] transition-all"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAMARADA 2 -->
+        <div id="cat2-container-box" class="flex flex-col items-center group relative p-3 rounded-2xl bg-[#fff8ed]/55 backdrop-blur-[2px] border-2 border-red-900/20 transition-all"
+             ondragover="handleCatDragOver(event)"
+             ondragenter="handleCatDragOver(event)"
+             ondragleave="handleCatDragLeave(event)"
+             ondrop="handleCatDrop('cat2', event)">
+          <div class="absolute -top-3 bg-red-700 text-amber-200 font-bold text-xs px-3 py-0.5 rounded-full sketch-border z-10 flex items-center gap-1">
+            <span>🚩</span>
+            <span id="cat2-title-label">Camarada 2</span>
+            <span id="cat2-tag-role" class="text-[10px] bg-black/25 px-1 rounded">(Amor)</span>
+          </div>
+
+          <div id="speech-cat2" onclick="openLetterModal()" title="Toque para ler os Telegramas do Comitê" 
+               class="mb-2 px-3 py-1 rounded-2xl bg-[#fff8ed] sketch-border text-xs sm:text-sm font-hand max-w-[210px] text-center transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95 shadow-sm">
+            Esperando meu Camarada... ☭💖
+          </div>
+
+          <div id="cat2-drop-area" class="cat-drop-target w-44 h-44 sm:w-52 sm:h-52 cursor-pointer relative transition-transform duration-200 rounded-2xl"
+               onclick="handleCatInteraction('cat2', event)"
+               ondragover="handleCatDragOver(event)"
+               ondragenter="handleCatDragOver(event)"
+               ondragleave="handleCatDragLeave(event)"
+               ondrop="handleCatDrop('cat2', event)"
+               title="Toque para saudação camarada ou solte ração aqui!">
+            <div id="cat2-svg-mount" class="w-full h-full"></div>
+            <span class="absolute bottom-1 right-2 text-[10px] bg-[#fff8ed]/95 px-2 py-0.5 rounded-full border border-pencil/60 text-red-950 font-bold">
+              Carinho / Ração Estatal 🐟
+            </span>
+
+            <div id="cat2-locked-overlay" class="hidden absolute inset-0 bg-red-950/75 backdrop-blur-[2px] rounded-2xl flex flex-col items-center justify-center text-center p-3 text-amber-100 border-2 border-dashed border-amber-400">
+              <span class="text-3xl mb-1">💤☭</span>
+              <span class="text-xs font-bold leading-tight">Camarada em repouso sindical!</span>
+              <button onclick="openSyncModal()" class="mt-2 text-[11px] bg-red-700 hover:bg-red-600 text-amber-200 border border-amber-300 px-2.5 py-1 rounded-lg font-bold shadow">
+                Bater Ponto do Sindicato ☭
+              </button>
+            </div>
+          </div>
+
+          <div class="w-full max-w-[220px] bg-[#fff8ed]/95 p-2.5 rounded-xl sketch-border mt-2 space-y-1.5 text-xs font-semibold">
+            <div class="flex justify-between items-center">
+              <span>Ração 🐟</span>
+              <div class="w-24 bg-stone-200 h-2 rounded-full border border-pencil overflow-hidden">
+                <div id="cat2-hunger-bar" class="h-full bg-amber-500 w-[60%] transition-all"></div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center">
+              <span>Vigor Operário ⚡</span>
+              <div class="w-24 bg-stone-200 h-2 rounded-full border border-pencil overflow-hidden">
+                <div id="cat2-energy-bar" class="h-full bg-blue-600 w-[70%] transition-all"></div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center">
+              <span>Moral Revolucionária ☭</span>
+              <div class="w-24 bg-stone-200 h-2 rounded-full border border-pencil overflow-hidden">
+                <div id="cat2-happy-bar" class="h-full bg-red-600 w-[85%] transition-all"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="backpack-drawer" class="w-full bg-[#6b1414] text-[#fde68a] p-3 rounded-2xl border-2 border-[#2b1111] shadow-md mt-4 transition-all">
+        <div class="flex items-center justify-between pb-2 border-b border-[#fde68a]/30 text-xs font-bold">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🎒</span>
+            <span>Armazém Coletivo de Rações 🎒</span>
+            <span class="text-[10px] font-normal text-amber-200/85">(Clique na ração ou arraste até o Camarada!)</span>
+          </div>
+          <button onclick="toggleBackpack()" class="text-xs bg-[#881b1b] hover:bg-[#991b1b] px-2.5 py-1 rounded-lg border border-[#fde68a]/40 text-[#fde68a]">
+            ✕ Fechar Armazém
+          </button>
+        </div>
+        <div id="feed-action-bar-container" class="w-full"></div>
+        <div id="backpack-slots-container" class="flex gap-2.5 overflow-x-auto py-2.5 px-1 scrollbar-thin"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- DOCK FLUTUANTE DE ESCRITA (RÁDIO PRAVDA) -->
+  <div id="floating-chat-container" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 w-[95%] max-w-lg bg-[#fff8ed] bg-paper-card modal-card-bg border-2 border-pencil rounded-2xl shadow-2xl p-2.5 z-40 space-y-2">
+    <div class="flex items-center justify-between border-b border-pencil/20 pb-1.5 px-1 text-xs">
+      <div class="flex items-center gap-1.5 font-bold text-red-900">
+        <span class="animate-pulse">📻☭</span>
+        <span>Rádio Pravda — Transmissão ao Vivo para os Camaradas</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button onclick="openLetterModal()" class="text-[11px] bg-amber-200 hover:bg-amber-300 border border-pencil px-2 py-0.5 rounded-lg font-bold text-red-950">
+          📜 Arquivo do Comitê
+        </button>
+        <button onclick="closeFloatingChat()" class="text-xs font-bold p-1 hover:text-red-600">&times;</button>
+      </div>
+    </div>
+
+    <div id="floating-recent-bubble" class="text-[11px] bg-white border border-pencil/30 rounded-xl px-2.5 py-1 font-hand truncate text-pencil/80">
+      Nenhum telegrama recente no Comitê.
+    </div>
+
+    <div class="flex items-center gap-1 overflow-x-auto pb-0.5 text-xs">
+      <button onclick="insertQuickMessageFloating('Nosso amor foi coletivizado para sempre! ☭💖')" class="bg-white hover:bg-red-100 border border-pencil/40 px-2 py-0.5 rounded-full whitespace-nowrap text-[10px] font-bold text-red-900">
+        ☭ Amor Coletivizado
+      </button>
+      <button onclick="insertQuickMessageFloating('Saudades do meu Camarada! Vem cumprir nossa meta de beijos 🐾')" class="bg-white hover:bg-amber-100 border border-pencil/40 px-2 py-0.5 rounded-full whitespace-nowrap text-[10px] font-bold text-amber-900">
+        🐾 Meta de Beijos
+      </button>
+      <button onclick="insertQuickMessageFloating('Você é a revolução da minha vida! ⭐')" class="bg-white hover:bg-red-50 border border-pencil/40 px-2 py-0.5 rounded-full whitespace-nowrap text-[10px] font-bold text-red-800">
+        ⭐ Minha Revolução
+      </button>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <input type="text" id="floating-chat-input" maxlength="160" placeholder="Transmita seu manifesto de amor para o Camarada..."
+             class="flex-1 bg-white border-2 border-pencil rounded-xl px-3 py-1.5 text-xs sm:text-sm font-hand text-pencil focus:outline-none focus:ring-2 focus:ring-red-500">
+      <button onclick="sendLoveLetterFromFloating()" class="sketch-btn bg-red-700 hover:bg-red-800 text-amber-200 font-bold text-xs px-3.5 py-1.5 rounded-xl flex items-center gap-1 whitespace-nowrap shadow">
+        <span>Transmitir</span>
+        <span>☭</span>
+      </button>
+    </div>
+  </div>
+
+<nav class="fixed bottom-3 left-1/2 -translate-x-1/2 w-[95%] max-w-2xl bg-[#fff8ed] bg-paper-card modal-card-bg border-2 border-pencil rounded-2xl shadow-xl p-2 flex justify-around items-center z-40">
+    <button onclick="toggleBackpack()" class="sketch-btn bg-amber-100 hover:bg-amber-200 px-2.5 py-1.5 rounded-xl text-xs font-bold flex flex-col items-center text-red-950">
+      <span class="text-base sm:text-lg">🎒</span>
+      <span class="text-[10px] sm:text-xs">Armazém</span>
+    </button>
+    <button onclick="openFoodStallModal()" class="sketch-btn bg-red-100 hover:bg-red-200 px-2.5 py-1.5 rounded-xl text-xs font-bold flex flex-col items-center text-red-950">
+      <span class="text-base sm:text-lg">🏪</span>
+      <span class="text-[10px] sm:text-xs">Cooperativa</span>
+    </button>
+    <button onclick="openGamesHubModal()" class="sketch-btn bg-amber-200 hover:bg-amber-300 px-2.5 py-1.5 rounded-xl text-xs font-bold flex flex-col items-center text-red-950">
+      <span class="text-base sm:text-lg">🎮</span>
+      <span class="text-[10px] sm:text-xs">Olimpíadas</span>
+    </button>
+    <button onclick="openPartnerProfileModal()" class="sketch-btn bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-xl text-xs font-bold flex flex-col items-center text-red-900">
+      <span class="text-base sm:text-lg">📖</span>
+      <span class="text-[10px] sm:text-xs">Partido</span>
+    </button>
+    <button onclick="toggleFloatingChat()" class="sketch-btn bg-red-700 hover:bg-red-800 px-2.5 py-1.5 rounded-xl text-xs font-bold flex flex-col items-center text-amber-200" title="Rádio Pravda (Chat Vivo)">
+      <span class="text-base sm:text-lg">💬</span>
+      <span class="text-[10px] sm:text-xs">Rádio Pravda</span>
+    </button>
+    <button onclick="openVipShopModal()" class="sketch-btn bg-amber-300 hover:bg-amber-400 px-2.5 py-1.5 rounded-xl text-xs font-bold flex flex-col items-center text-red-950">
+      <span class="text-base sm:text-lg">☭</span>
+      <span class="text-[10px] sm:text-xs">Ateliê Estatal</span>
+    </button>
+  </nav>
+
+  <!-- MODAL DE AUTENTICAÇÃO DO COMITÊ CENTRAL -->
+  <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] hidden flex items-center justify-center p-3 select-none">
+    <div class="bg-[#fff8ed] max-w-md w-full p-5 sm:p-6 rounded-3xl sketch-border space-y-4 text-center relative shadow-2xl border-t-8 border-t-red-700">
+      <div class="space-y-1">
+        <span class="text-4xl block animate-bounce" id="login-modal-icon">☭🔐</span>
+        <h2 class="font-caveat text-3xl font-bold text-red-900" id="login-modal-title">Credencial do Comitê Central</h2>
+        <p class="text-xs text-pencil/80" id="login-modal-desc">Identificação proletária para proteger a Praça Vermelha do casal!</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 pt-1">
+        <button type="button" onclick="chooseProfileTarget('cat1')" id="login-card-cat1" 
+                class="p-3.5 rounded-2xl border-2 border-pencil bg-white hover:bg-amber-50 active:scale-95 transition-all flex flex-col items-center gap-2 group shadow-sm relative">
+          <div class="w-16 h-16 rounded-full bg-amber-100 border-2 border-pencil flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+            🐱⭐
+          </div>
+          <div>
+            <span class="font-bold text-sm block text-amber-950" id="login-label-cat1">Camarada 1</span>
+            <span class="text-[10px] text-pencil/60">(Ele)</span>
+          </div>
+          <span class="text-[10px] bg-amber-300 text-red-950 px-2 py-0.5 rounded-full font-bold">Sou Camarada 1 ☭</span>
+        </button>
+
+        <button type="button" onclick="chooseProfileTarget('cat2')" id="login-card-cat2" 
+                class="p-3.5 rounded-2xl border-2 border-pencil bg-white hover:bg-red-50 active:scale-95 transition-all flex flex-col items-center gap-2 group shadow-sm relative">
+          <div class="w-16 h-16 rounded-full bg-red-100 border-2 border-pencil flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+            🌸🚩
+          </div>
+          <div>
+            <span class="font-bold text-sm block text-red-900" id="login-label-cat2">Camarada 2</span>
+            <span class="text-[10px] text-pencil/60">(Ela)</span>
+          </div>
+          <span class="text-[10px] bg-red-700 text-amber-200 px-2 py-0.5 rounded-full font-bold">Sou Camarada 2 ☭</span>
+        </button>
+      </div>
+
+      <div class="bg-white p-3.5 rounded-2xl border border-pencil/30 text-left space-y-2.5 shadow-sm">
+        <div>
+          <label class="text-[11px] font-bold text-pencil/80 block mb-0.5">Seu Codinome Revolucionário:</label>
+          <input type="text" id="login-nickname-input" placeholder="Ex: Camarada Mô, Líder Fofinho..." maxlength="15" 
+                 class="w-full text-xs p-2 rounded-xl border border-pencil text-pencil bg-[#fff8ed] focus:outline-none focus:ring-2 focus:ring-red-500">
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-0.5">
+            <label class="text-[11px] font-bold text-red-950 block" id="login-password-label">🔑 Código Secreto da KGB (Opcional):</label>
+            <span class="text-[10px] text-pencil/50 italic" id="login-password-hint">(Combinado pelo casal)</span>
+          </div>
+          <input type="password" id="login-password-input" placeholder="Digite a senha..." maxlength="30" 
+                 class="w-full text-xs p-2 rounded-xl border-2 border-pencil text-pencil bg-[#fff8ed] focus:outline-none focus:ring-2 focus:ring-red-500 font-mono">
+        </div>
+      </div>
+
+      <button type="button" onclick="submitSecureLogin()" id="login-submit-btn" class="sketch-btn w-full bg-red-700 hover:bg-red-800 text-amber-200 font-bold text-sm py-2.5 rounded-2xl shadow">
+        Ingressar na União Felina ☭
+      </button>
+    </div>
+  </div>
+
+  <!-- COOPERATIVA ESTATAL DE ALIMENTOS -->
+  <div id="food-stall-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#fff8ed] max-w-md w-full rounded-2xl sketch-border overflow-hidden relative shadow-2xl flex flex-col max-h-[92vh]">
+      <div class="stall-canopy h-8 w-full flex-shrink-0"></div>
+      
+      <div class="p-3 sm:p-4 space-y-3 overflow-y-auto">
+        <div class="flex justify-between items-start">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">🏪☭</span>
+            <div>
+              <h3 class="font-caveat text-2xl font-bold text-red-950">Cooperativa & Tenda do Camarada Mercador</h3>
+              <p class="text-[11px] text-pencil/80">Adquira rações coletivizadas usando seus Rublos Felinos 🐾!</p>
+            </div>
+          </div>
+          <button onclick="closeFoodStallModal()" class="text-xl font-bold p-1">&times;</button>
+        </div>
+
+        <div class="relative bg-gradient-to-b from-[#f9e2c2] to-[#f1cc99] border-2 border-stone-800 rounded-2xl overflow-hidden p-3 shadow-inner">
+          <div class="flex items-end justify-between gap-2">
+            <div class="w-24 h-24 sm:w-28 sm:h-28 relative flex-shrink-0">
+              <!-- Gato Mercador com Boina Vermelha, Estrela Dourada e Avental Vermelho Soviético -->
+              <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-md select-none">
+                <g class="anim-tail">
+                  <path d="M 134,152 C 162,150 180,134 172,118 C 165,106 152,114 148,126 C 144,136 134,146 130,154 Z" 
+                        fill="#ebdcc9" stroke="#2b1111" stroke-width="3.8" stroke-linejoin="round" stroke-linecap="round" />
+                </g>
+                <g class="anim-body">
+                  <path d="M 64,136 C 56,152 56,168 68,172 C 78,175 84,164 88,152 C 94,152 104,152 110,152 C 114,164 120,175 130,172 C 142,168 140,152 134,136 Z" 
+                        fill="#ebdcc9" stroke="#2b1111" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" />
+                  <!-- Avental Vermelho Soviético -->
+                  <polygon points="76,138 120,138 124,170 72,170" fill="#b91c1c" stroke="#2b1111" stroke-width="2.5" />
+                  <line x1="82" y1="138" x2="72" y2="124" stroke="#2b1111" stroke-width="2.5"/>
+                  <line x1="114" y1="138" x2="124" y2="124" stroke="#2b1111" stroke-width="2.5"/>
+                  <rect x="88" y="146" width="20" height="15" rx="3" fill="#991b1b" stroke="#fbbf24" stroke-width="1.8"/>
+                  <polygon points="98,148 100,152 104,152 101,155 102,159 98,156 94,159 95,155 92,152 96,152" fill="#fbbf24"/>
+                  <path d="M 44,82 C 40,54 44,38 52,42 C 64,48 82,70 98,70 C 114,70 132,48 144,42 C 152,38 156,54 152,82 C 160,112 142,138 98,138 C 54,138 36,112 44,82 Z" 
+                        fill="#ebdcc9" stroke="#2b1111" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" />
+                  <polygon points="52,46 64,54 52,68" fill="#f7c2c2" opacity="0.75" />
+                  <polygon points="144,46 132,54 144,68" fill="#f7c2c2" opacity="0.75" />
+                  <!-- Boina Vermelha Revolucionária com Estrela Dourada -->
+                  <path d="M 60,48 Q 98,20 136,46 Q 142,56 128,58 Q 98,50 68,58 Q 54,56 60,48 Z" fill="#b91c1c" stroke="#2b1111" stroke-width="2.8"/>
+                  <polygon points="98,32 100.5,37 106,37.5 102,41 103,46.5 98,43.5 93,46.5 94,41 90,37.5 95.5,37" fill="#fbbf24" stroke="#2b1111" stroke-width="1"/>
+                  <g class="anim-blink">
+                    <ellipse cx="74" cy="96" rx="12" ry="15" fill="#2b1111" />
+                    <ellipse cx="122" cy="96" rx="12" ry="15" fill="#2b1111" />
+                    <circle cx="78" cy="92" r="4.5" fill="#ffffff" />
+                    <circle cx="126" cy="92" r="4.5" fill="#ffffff" />
+                  </g>
+                  <polygon points="95,110 101,110 98,114" fill="#b91c1c" />
+                  <path d="M 92,115 Q 98,123 104,115" fill="none" stroke="#2b1111" stroke-width="2.8" stroke-linecap="round" />
+                  <ellipse cx="80" cy="164" rx="8" ry="6" fill="#ebdcc9" stroke="#2b1111" stroke-width="3" />
+                  <ellipse cx="116" cy="164" rx="8" ry="6" fill="#ebdcc9" stroke="#2b1111" stroke-width="3" />
+                </g>
+              </svg>
+            </div>
+            <div class="bg-[#fff8ed] p-2.5 rounded-2xl border-2 border-pencil text-xs font-hand text-sm flex-1 shadow-sm">
+              <span id="vendor-balloon-text">Saudações, Camarada! Rações frescas do Plano Quinquenal para fortalecer o coletivo do casal! 🍲☭</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-60 overflow-y-auto p-1" id="stall-goods-grid"></div>
+
+        <div class="text-center pt-1 text-xs text-pencil/80 font-bold">
+          Seus Rublos Felinos: <span class="font-black text-red-800" id="stall-paws-count">0 🐾</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATELIÊ ESTATAL DO POVO (LOJA VIP) -->
+  <div id="vip-shop-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#fff8ed] max-w-lg w-full p-4 sm:p-5 rounded-2xl sketch-border space-y-3 relative max-h-[92vh] flex flex-col shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pencil/20 pb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl text-red-700">☭✨</span>
+          <div>
+            <h3 class="font-caveat text-2xl font-bold text-red-950">Ateliê Estatal do Povo ☭</h3>
+            <p class="text-[11px] text-pencil/70">Uniformes, boinas revolucionárias e insígnias de casal!</p>
+          </div>
+        </div>
+        <button onclick="closeVipShopModal()" class="text-xl font-bold p-1">&times;</button>
+      </div>
+
+      <div class="w-full bg-[#f5e3c8] border-2 border-pencil rounded-2xl p-3 flex items-center justify-between shadow-inner">
+        <div class="flex items-center gap-3">
+          <div id="shop-live-preview-box" class="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl border-2 border-pencil shadow flex items-center justify-center overflow-hidden flex-shrink-0"></div>
+          <div>
+            <span class="text-xs font-bold text-red-950 block">Provador do Camarada</span>
+            <span id="preview-item-description" class="text-[10px] text-pencil/70">Inspecionando uniforme em tempo real</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-1.5 text-xs font-bold">
+          <span class="bg-amber-100 text-amber-950 px-2.5 py-1 rounded-lg border border-amber-400 shadow-sm" id="shop-fish-count">0 🐟</span>
+          <span class="bg-red-100 text-red-900 px-2.5 py-1 rounded-lg border border-red-400 shadow-sm" id="shop-couple-coin-count">0 ☭💖</span>
+        </div>
+      </div>
+
+      <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs font-bold scrollbar-none border-b border-pencil/20">
+        <button onclick="switchShopTab('roupas')" id="tab-roupas" class="px-2.5 py-1 rounded-lg bg-amber-200 border border-pencil text-rose-950">Vestidos & Roupas 👗</button>
+        <button onclick="switchShopTab('pupilas')" id="tab-pupilas" class="px-2.5 py-1 rounded-lg bg-white border border-pencil">Pupilas</button>
+        <button onclick="switchShopTab('olhos')" id="tab-olhos" class="px-2.5 py-1 rounded-lg bg-white border border-pencil">Formato/Olhos</button>
+        <button onclick="switchShopTab('metadinhas')" id="tab-metadinhas" class="px-2.5 py-1 rounded-lg bg-white border border-pencil text-rose-800">Metadinhas 💖</button>
+        <button onclick="switchShopTab('acessorios')" id="tab-acessorios" class="px-2.5 py-1 rounded-lg bg-white border border-pencil">Acessórios</button>
+        <button onclick="switchShopTab('racas')" id="tab-racas" class="px-2.5 py-1 rounded-lg bg-white border border-pencil">Pelagens</button>
+        <button onclick="switchShopTab('bocas')" id="tab-bocas" class="px-2.5 py-1 rounded-lg bg-white border border-pencil">Bocas</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto grid grid-cols-2 gap-2.5 p-1" id="shop-items-grid"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DE TINTAS E CORES -->
+  <div id="palette-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#fff8ed] max-w-sm w-full p-4 rounded-2xl sketch-border space-y-3 text-center shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pencil/20 pb-1">
+        <h3 class="font-caveat text-2xl font-bold text-red-950" id="palette-title">Pigmentos do Estado</h3>
+        <button onclick="closePaletteModal()" class="text-xl font-bold">&times;</button>
+      </div>
+      <p class="text-xs text-pencil/70" id="palette-subtitle">Escolha uma cor ou requisitione tinta especial (1 🐟):</p>
+      
+      <div class="grid grid-cols-4 gap-2.5 max-h-56 overflow-y-auto p-1" id="palette-swatches-grid"></div>
+
+      <div class="border-t border-dashed border-pencil/30 pt-2 flex items-center justify-center gap-2">
+        <label class="text-xs font-bold">Cor Livre:</label>
+        <input type="color" id="custom-color-picker" value="#b91c1c" class="w-8 h-8 rounded border border-pencil cursor-pointer">
+        <button onclick="buyCustomHexColor()" class="sketch-btn bg-amber-200 hover:bg-amber-300 text-xs px-2.5 py-1 rounded-lg font-bold text-red-950">
+          Requisitar Tinta (1 🐟)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIÁRIO DO PARTIDO (VÍNCULO & METAS QUINQUENAIS) -->
+  <div id="partner-profile-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#fff8ed] max-w-md w-full p-4 sm:p-5 rounded-3xl sketch-border space-y-4 relative max-h-[92vh] overflow-y-auto shadow-2xl">
+      <div class="flex justify-between items-center border-b-2 border-pencil/20 pb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-3xl">📖☭</span>
+          <div>
+            <h3 class="font-caveat text-2xl font-bold text-red-950">Diário do Partido & Planos Quinquenais</h3>
+            <p class="text-[11px] text-pencil/70">Registro histórico da união proletária na nuvem</p>
+          </div>
+        </div>
+        <button onclick="closePartnerProfileModal()" class="text-xl font-bold p-1">&times;</button>
+      </div>
+
+      <div class="bg-gradient-to-r from-red-100 via-amber-100 to-red-100 border-2 border-pencil rounded-2xl p-3.5 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-red-950">Chama da Revolução ☭</span>
+          <span class="text-xs bg-white/90 px-2 py-0.5 rounded-full border border-pencil font-bold text-red-900">Ponto Diário ✓</span>
+        </div>
+        
+        <div class="flex items-center justify-around text-center py-1">
+          <div>
+            <div class="text-2xl font-black text-red-700 flex items-center justify-center gap-1">
+              <span>🔥</span> <span id="streak-current-display">1</span>
+            </div>
+            <span class="text-[11px] font-semibold text-pencil/80">Dias Seguidos</span>
+          </div>
+          <div class="border-l border-pencil/30 h-8"></div>
+          <div>
+            <div class="text-xl font-bold text-amber-800" id="streak-best-display">1</div>
+            <span class="text-[11px] font-semibold text-pencil/80">Recorde Estatal</span>
+          </div>
+          <div class="border-l border-pencil/30 h-8"></div>
+          <div>
+            <div class="text-xl font-bold text-red-900" id="streak-total-display">1</div>
+            <span class="text-[11px] font-semibold text-pencil/80">Total de Dias</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border-2 border-pencil rounded-2xl p-3 space-y-2">
+        <h4 class="text-xs font-bold text-pencil flex items-center justify-between">
+          <span>🏆 Quadro de Honra das Olimpíadas</span>
+          <span class="text-[10px] text-red-900 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-400">
+            Herói do Trabalho
+          </span>
+        </h4>
+
+        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+          <div class="bg-amber-50 p-2 rounded-xl border border-pencil">
+            <span class="font-bold text-[11px] block" id="score-cat1-name-label">Camarada 1</span>
+            <span class="text-lg font-black text-amber-800" id="score-cat1-wins">0</span>
+            <span class="text-[10px] text-pencil/70 block">Vitórias</span>
+          </div>
+          <div class="bg-stone-50 p-2 rounded-xl border border-pencil">
+            <span class="font-bold text-[11px] block">Empates</span>
+            <span class="text-lg font-black text-stone-700" id="score-ties">0</span>
+            <span class="text-[10px] text-pencil/70 block">Partidas</span>
+          </div>
+          <div class="bg-red-50 p-2 rounded-xl border border-pencil">
+            <span class="font-bold text-[11px] block" id="score-cat2-name-label">Camarada 2</span>
+            <span class="text-lg font-black text-red-800" id="score-cat2-wins">0</span>
+            <span class="text-[10px] text-pencil/70 block">Vitórias</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONEXÃO DIÁRIA DO COMITÊ CENTRAL (SINCRONIZAÇÃO) -->
+  <div id="sync-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#fff8ed] bg-paper-card modal-card-bg max-w-sm w-full p-4 sm:p-5 rounded-3xl sketch-border space-y-3.5 text-center relative shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pencil/20 pb-2">
+        <h3 class="font-caveat text-2xl font-bold text-red-950">Conexão Diária do Comitê Central ☭</h3>
+        <button onclick="closeSyncModal()" class="text-xl font-bold p-1">&times;</button>
+      </div>
+
+      <p class="text-xs text-pencil/80">
+        Para liberar o Camarada do seu amor hoje e cumprir o Plano Quinquenal, aproximem os aparelhos via <b>NFC</b> ou validem o código estatal de 6 dígitos!
+      </p>
+
+      <div class="bg-amber-50 border-2 border-red-800 rounded-2xl p-3 space-y-1.5 shadow-sm">
+        <span class="text-2xl block">📲☭</span>
+        <h4 class="text-xs font-bold text-red-950">Contato Sindical via NFC</h4>
+        <p class="text-[11px] text-red-900/80">Encostem os aparelhos para autenticar a presença proletária.</p>
+        <button onclick="triggerWebNfcSync()" class="sketch-btn w-full bg-red-700 hover:bg-red-800 text-amber-200 text-xs py-1.5 rounded-xl font-bold">
+          Ativar Leitor NFC 📡
+        </button>
+      </div>
+
+      <div class="bg-red-50 border-2 border-red-800 rounded-2xl p-3 space-y-2.5 shadow-sm">
+        <div class="flex items-center justify-between text-left">
+          <div>
+            <h4 class="text-xs font-bold text-red-950">Seu Código Estatal de Hoje</h4>
+            <p class="text-[10px] text-pencil/70">Informe este número ao seu Camarada:</p>
+          </div>
+          <button onclick="copyMyDailyCode()" class="text-[10px] bg-amber-300 hover:bg-amber-400 px-2 py-0.5 rounded border border-pencil font-bold text-red-950">
+            Copiar 📋
+          </button>
+        </div>
+
+        <div class="bg-white border-2 border-dashed border-red-700 py-2 px-3 rounded-xl font-mono text-xl font-black text-red-950 tracking-widest shadow-inner" id="daily-generated-code-box">
+          ------
+        </div>
+
+        <div class="pt-1 border-t border-red-200">
+          <label class="block text-[11px] font-bold text-red-950 text-left mb-1">
+            Digite os 6 dígitos enviados pelo seu Camarada:
+          </label>
+          <div class="flex gap-1.5">
+            <input type="tel" maxlength="6" id="partner-sync-input" placeholder="Ex: 849201" 
+                   class="w-full text-center font-mono text-base font-bold tracking-widest p-1.5 rounded-lg border-2 border-pencil bg-white focus:outline-none focus:ring-2 focus:ring-red-500">
+            <button onclick="submitPartnerDailyCode()" class="sketch-btn bg-amber-400 hover:bg-amber-500 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap text-red-950">
+              Validar ☭
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OLIMPÍADAS SOVIÉTICAS FELINAS (CENTRAL DE JOGOS) -->
+  <div id="games-hub-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#fff8ed] bg-paper-card modal-card-bg max-w-md w-full p-4 sm:p-5 rounded-3xl sketch-border space-y-3 relative max-h-[92vh] flex flex-col shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pencil/20 pb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🎮☭</span>
+          <div>
+            <h3 class="font-caveat text-2xl font-bold text-red-950">Olimpíadas Soviéticas Felinas 🎮</h3>
+            <p class="text-[11px] text-pencil/70">Conquistem 🐾 Rublos Felinos competindo em união!</p>
+          </div>
+        </div>
+        <button onclick="closeGamesHubModal()" class="text-xl font-bold p-1">&times;</button>
+      </div>
+
+      <div class="flex gap-2 text-xs font-bold border-b border-pencil/20 pb-1">
+        <button onclick="switchGamesTab('online')" id="btn-tab-online" class="px-3 py-1 rounded-xl bg-amber-300 border border-pencil font-bold text-red-950">🌐 Disputas Online & Nova Guia</button>
+        <button onclick="switchGamesTab('solo')" id="btn-tab-solo" class="px-3 py-1 rounded-xl bg-white border border-pencil">Solo & Mesma Tela</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-2.5 p-1" id="games-list-container"></div>
+    </div>
+  </div>
+
+  <!-- JOGO DA VELHA COLETIVO -->
+  <div id="tictactoe-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#fff8ed] max-w-sm w-full p-4 rounded-3xl sketch-border space-y-3 text-center relative shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pencil/20 pb-1">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xl">☭⭐</span>
+          <h3 class="font-caveat text-2xl font-bold text-red-950">Jogo da Velha Coletivo 🐾</h3>
+        </div>
+        <button onclick="closeTicTacToeModal()" class="text-xl font-bold">&times;</button>
+      </div>
+
+      <div id="ttt-room-lobby-bar" class="bg-amber-50 border border-pencil/30 rounded-xl p-2 text-xs font-bold flex items-center justify-around">
+        <div class="flex items-center gap-1">
+          <span id="ttt-p1-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+          <span id="ttt-p1-label">Camarada 1</span>
+        </div>
+        <span class="text-pencil/40">VS</span>
+        <div class="flex items-center gap-1">
+          <span id="ttt-p2-dot" class="w-2.5 h-2.5 rounded-full bg-stone-300 inline-block"></span>
+          <span id="ttt-p2-label">Camarada 2</span>
+        </div>
+      </div>
+
+      <div id="ttt-waiting-banner" class="hidden bg-red-100 border-2 border-dashed border-red-500 rounded-2xl p-2.5 text-xs text-red-950 space-y-1">
+        <span class="text-xl block animate-bounce">⏳</span>
+        <p class="font-bold">Aguardando Camarada...</p>
+        <p class="text-[11px] leading-tight text-red-900/80">Esperando seu amor abrir esta tela no aparelho dele(a) para iniciar!</p>
+      </div>
+
+      <div id="ttt-first-round-banner" class="bg-amber-100 border-2 border-dashed border-amber-600 rounded-2xl p-2 text-xs text-amber-950 space-y-1.5">
+        <p class="font-bold text-[11px]">1ª Rodada: Qual Camarada inicia?</p>
+        <div class="flex justify-center gap-1.5 flex-wrap">
+          <button onclick="openJokenpoForFirstTurn()" class="sketch-btn bg-red-200 hover:bg-red-300 px-2 py-0.5 rounded-lg text-[10px] font-bold text-red-950">
+            Decidir no Jokenpô ✊
+          </button>
+          <button onclick="setFirstTurnPlayer('cat1')" class="sketch-btn bg-white hover:bg-amber-50 px-2 py-0.5 rounded-lg text-[10px] font-bold">
+            Camarada 1
+          </button>
+          <button onclick="setFirstTurnPlayer('cat2')" class="sketch-btn bg-white hover:bg-red-50 px-2 py-0.5 rounded-lg text-[10px] font-bold">
+            Camarada 2
+          </button>
+        </div>
+      </div>
+      
+      <div class="flex justify-between items-center text-xs font-bold px-2">
+        <span>Você: <b class="text-red-700" id="ttt-my-symbol">🐾</b></span>
+        <span id="ttt-turn-indicator" class="bg-amber-100 px-2 py-0.5 rounded-full border border-pencil">Vez do Camarada 1</span>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 bg-[#d9b38c] p-2.5 rounded-2xl border-2 border-pencil max-w-[260px] mx-auto" id="ttt-board-grid"></div>
+
+      <div class="text-xs text-pencil/70 flex justify-between items-center px-1">
+        <button onclick="resetTicTacToeGame()" class="sketch-btn bg-stone-100 px-2.5 py-1 rounded-lg font-bold text-[11px]">Reiniciar Partida</button>
+        <span id="ttt-status-msg">Jogue no seu turno!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- JOKENPÔ PROLETÁRIO -->
+  <div id="jokenpo-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#fff8ed] max-w-md w-full p-4 rounded-3xl sketch-border space-y-3 text-center relative max-h-[95vh] flex flex-col overflow-y-auto shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pencil/20 pb-1">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">✊☭</span>
+          <div class="text-left">
+            <h3 class="font-caveat text-2xl font-bold text-red-950">Jokenpô Proletário das Patinhas</h3>
+            <p class="text-[10px] text-pencil/70">Pedra, papel ou tesoura dos camaradas felinos!</p>
+          </div>
+        </div>
+        <button onclick="closeJokenpoModal()" class="text-xl font-bold p-1">&times;</button>
+      </div>
+
+      <div class="flex justify-center gap-1.5 text-xs font-bold bg-amber-100/70 p-1 rounded-xl border border-pencil/20">
+        <button id="jokenpo-tab-online" onclick="selectJokenpoMode('online')" class="px-2.5 py-1 rounded-lg bg-amber-300 border border-pencil text-stone-900 shadow-sm font-bold">
+          🌐 Online (2 Aparelhos)
+        </button>
+        <button id="jokenpo-tab-local" onclick="selectJokenpoMode('local')" class="px-2.5 py-1 rounded-lg bg-white border border-pencil text-stone-700 hover:bg-stone-50 font-normal">
+          👥 Mesma Tela
+        </button>
+        <button id="jokenpo-tab-bot" onclick="selectJokenpoMode('bot')" class="px-2.5 py-1 rounded-lg bg-white border border-pencil text-stone-700 hover:bg-stone-50 font-normal">
+          🤖 vs Autômato
+        </button>
+      </div>
+
+      <div id="jkp-waiting-banner" class="hidden bg-red-100 border-2 border-dashed border-red-500 rounded-2xl p-2.5 text-xs text-red-950 space-y-1">
+        <span class="text-xl block animate-bounce">⏳</span>
+        <p class="font-bold">Aguardando Camarada...</p>
+        <p class="text-[11px] leading-tight text-red-900/80">Esperando seu amor abrir esta tela no aparelho dele(a) para começar!</p>
+      </div>
+
+      <div class="bg-white border-2 border-pencil rounded-2xl p-3 shadow-inner space-y-2">
+        <div class="flex items-center justify-around">
+          <div class="flex flex-col items-center">
+            <div id="jkp-cat1-svg-box" class="w-16 h-16 sm:w-20 sm:h-20"></div>
+            <span id="jkp-name-p1" class="text-xs font-bold text-amber-900 mt-1">Camarada 1</span>
+            <span id="jkp-p1-status-pill" class="text-[10px] font-bold mt-0.5 bg-white px-2 py-0.5 rounded-full border border-pencil/40 text-pencil/70">
+              Aguardando...
+            </span>
+            <div id="jkp-p1-gesture-display" class="mt-2 w-16 h-16 rounded-xl border-2 border-dashed border-pencil flex flex-col items-center justify-center bg-amber-50/50">
+              <span class="text-3xl">❓</span>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-center px-2">
+            <span class="text-xl font-black text-red-600">VS</span>
+            <div id="jkp-clash-countdown" class="font-caveat text-xl sm:text-2xl font-bold text-red-950 mt-1 text-center min-h-[32px] flex items-center">
+              Escolham suas patinhas! ☭
+            </div>
+          </div>
+
+          <div class="flex flex-col items-center">
+            <div id="jkp-cat2-svg-box" class="w-16 h-16 sm:w-20 sm:h-20"></div>
+            <span id="jkp-name-p2" class="text-xs font-bold text-red-900 mt-1">Camarada 2</span>
+            <span id="jkp-p2-status-pill" class="text-[10px] font-bold mt-0.5 bg-white px-2 py-0.5 rounded-full border border-pencil/40 text-pencil/70">
+              Aguardando...
+            </span>
+            <div id="jkp-p2-gesture-display" class="mt-2 w-16 h-16 rounded-xl border-2 border-dashed border-pencil flex flex-col items-center justify-center bg-red-50/50">
+              <span class="text-3xl">❓</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="jkp-result-action-box" class="hidden border-t border-pencil/20 pt-2 space-y-2">
+          <p id="jkp-result-banner" class="text-xs font-bold text-red-900 bg-red-50 p-2 rounded-xl border border-red-300"></p>
+          <div class="flex justify-center gap-2">
+            <button onclick="resetJokenpoMatch()" class="sketch-btn bg-amber-300 hover:bg-amber-400 px-3 py-1 rounded-xl text-xs font-bold text-red-950">
+              Nova Rodada 🐾
+            </button>
+            <button id="jkp-apply-turn-btn" onclick="applyJokenpoWinnerToTurnGame()" class="hidden sketch-btn bg-red-700 hover:bg-red-800 text-amber-200 px-3 py-1 rounded-xl text-xs font-bold shadow">
+              Aplicar 1º Turno ⚡
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-2" id="jkp-controls-area">
+        <div id="jkp-my-controls-box" class="bg-amber-50 p-2 rounded-xl border border-pencil/30 text-left">
+          <span class="text-[11px] font-bold text-red-950 block mb-1" id="jkp-my-controls-title">Escolha sua Patinha Proletária:</span>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="selectMyJokenpoPaw('rock')" class="sketch-btn bg-white hover:bg-amber-100 p-1.5 rounded-xl flex flex-col items-center">
+              <div id="svg-paw-rock-my"></div>
+              <span class="text-[10px] font-bold mt-0.5">✊ Pedra</span>
+            </button>
+            <button onclick="selectMyJokenpoPaw('paper')" class="sketch-btn bg-white hover:bg-amber-100 p-1.5 rounded-xl flex flex-col items-center">
+              <div id="svg-paw-paper-my"></div>
+              <span class="text-[10px] font-bold mt-0.5">✋ Papel</span>
+            </button>
+            <button onclick="selectMyJokenpoPaw('scissors')" class="sketch-btn bg-white hover:bg-amber-100 p-1.5 rounded-xl flex flex-col items-center">
+              <div id="svg-paw-scissors-my"></div>
+              <span class="text-[10px] font-bold mt-0.5">✌️ Tesoura</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="jkp-p2-controls-container" class="hidden bg-red-50 p-2 rounded-xl border border-pencil/30 text-left">
+          <span class="text-[11px] font-bold text-red-950 block mb-1">Patinha do Camarada 2 (Mesma Tela):</span>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="selectJokenpoPaw('cat2', 'rock')" class="sketch-btn bg-white hover:bg-red-100 p-1.5 rounded-xl flex flex-col items-center">
+              <div id="svg-paw-rock-p2"></div>
+              <span class="text-[10px] font-bold mt-0.5">✊ Pedra</span>
+            </button>
+            <button onclick="selectJokenpoPaw('cat2', 'paper')" class="sketch-btn bg-white hover:bg-red-100 p-1.5 rounded-xl flex flex-col items-center">
+              <div id="svg-paw-paper-p2"></div>
+              <span class="text-[10px] font-bold mt-0.5">✋ Papel</span>
+            </button>
+            <button onclick="selectJokenpoPaw('cat2', 'scissors')" class="sketch-btn bg-white hover:bg-red-100 p-1.5 rounded-xl flex flex-col items-center">
+              <div id="svg-paw-scissors-p2"></div>
+              <span class="text-[10px] font-bold mt-0.5">✌️ Tesoura</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATA RÁPIDA STAKHANOVISTA -->
+  <div id="reaction-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#fff8ed] max-w-sm w-full p-4 rounded-3xl sketch-border space-y-3 text-center relative shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pencil/20 pb-1">
+        <h3 class="font-caveat text-2xl font-bold text-red-950">Pata Rápida Stakhanovista! ⚡☭</h3>
+        <button onclick="closeReactionModal()" class="text-xl font-bold">&times;</button>
+      </div>
+
+      <div id="reaction-room-lobby-bar" class="bg-amber-50 border border-pencil/30 rounded-xl p-2 text-xs font-bold flex items-center justify-around">
+        <div class="flex items-center gap-1">
+          <span id="reaction-p1-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+          <span id="reaction-p1-label">Camarada 1</span>
+        </div>
+        <span class="text-pencil/40">VS</span>
+        <div class="flex items-center gap-1">
+          <span id="reaction-p2-dot" class="w-2.5 h-2.5 rounded-full bg-stone-300 inline-block"></span>
+          <span id="reaction-p2-label">Camarada 2</span>
+        </div>
+      </div>
+
+      <div id="reaction-waiting-banner" class="hidden bg-red-100 border-2 border-dashed border-red-500 rounded-2xl p-2.5 text-xs text-red-950 space-y-1">
+        <span class="text-xl block animate-bounce">⏳</span>
+        <p class="font-bold">Aguardando Camarada...</p>
+        <p class="text-[11px] leading-tight text-red-900/80">Esperando seu amor abrir esta tela no aparelho dele(a) para começar!</p>
+      </div>
+
+      <p class="text-xs text-pencil/70" id="reaction-hint-text">Aguarde a tigela acender em ouro estatal e toque na velocidade operária!</p>
+
+      <div id="reaction-arena" class="w-full h-44 rounded-2xl border-2 border-pencil flex flex-col items-center justify-center bg-stone-100 cursor-pointer select-none transition-colors duration-200" onclick="handleReactionTap()">
+        <span class="text-5xl" id="reaction-bowl-icon">🥣</span>
+        <span class="text-xs font-bold mt-2" id="reaction-prompt-text">Clique em iniciar turno...</span>
+      </div>
+
+      <button id="reaction-start-btn" onclick="startReactionRound()" class="sketch-btn w-full bg-amber-300 hover:bg-amber-400 text-red-950 py-2 rounded-xl font-bold text-xs">
+        Iniciar Turno Online ⚡
+      </button>
+    </div>
+  </div>
+
+  <!-- AIR HOCKEY SIBERIANO -->
+  <div id="airhockey-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#f0f9ff] max-w-sm w-full p-4 rounded-3xl sketch-border space-y-3 text-center relative max-h-[95vh] flex flex-col shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pencil/20 pb-1">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🏒❄️</span>
+          <div class="text-left">
+            <h3 class="font-caveat text-2xl font-bold text-red-950">Air Hockey Siberiano</h3>
+            <p id="airhockey-mode-desc" class="text-[10px] text-pencil/70">Disputa no gelo na mesma tela!</p>
+          </div>
+        </div>
+        <button onclick="closeAirHockeyModal()" class="text-xl font-bold p-1">&times;</button>
+      </div>
+
+      <div class="flex justify-center gap-1.5 text-xs font-bold bg-blue-100/70 p-1 rounded-xl border border-pencil/20">
+        <button id="ah-tab-local" onclick="selectAirHockeyMode('local')" class="px-3 py-1 rounded-lg bg-amber-300 border border-pencil text-stone-900 shadow-sm transition-all font-bold">
+          👥 Camaradas (Mesma Tela)
+        </button>
+        <button id="ah-tab-bot" onclick="selectAirHockeyMode('bot')" class="px-3 py-1 rounded-lg bg-white border border-pencil text-stone-700 hover:bg-stone-50 transition-all font-normal">
+          🤖 Treino (vs Autômato)
+        </button>
+      </div>
+
+      <div class="flex justify-around items-center bg-white px-3 py-1.5 rounded-2xl border-2 border-pencil text-xs font-bold shadow-sm">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+          <span id="airhockey-p1-name">Camarada 1</span>: 
+          <span id="airhockey-score-p1" class="text-base text-amber-600 font-black">0</span>
+        </div>
+        <span class="text-pencil/40 font-mono text-sm">VS</span>
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-600 inline-block"></span>
+          <span id="airhockey-p2-name">Camarada 2</span>: 
+          <span id="airhockey-score-p2" class="text-base text-red-600 font-black">0</span>
+        </div>
+      </div>
+
+      <div id="airhockey-canvas-container" class="w-full h-80 rounded-2xl border-2 border-pencil relative overflow-hidden select-none touch-none bg-blue-50">
+        <canvas id="airhockey-canvas" class="w-full h-full block cursor-pointer"></canvas>
+        
+        <div id="airhockey-overlay" class="absolute inset-0 bg-black/65 backdrop-blur-[2px] flex flex-col items-center justify-center p-4 text-white text-center transition-all">
+          <span class="text-4xl mb-1 animate-bounce" id="airhockey-overlay-icon">🏒☭</span>
+          <h4 id="airhockey-overlay-title" class="font-caveat text-2xl font-bold">Air Hockey Siberiano</h4>
+          <p id="airhockey-overlay-msg" class="text-xs text-stone-200 mt-1 max-w-[240px] leading-relaxed">
+            Multi-touch ativo! Camarada 1 defende a base e Camarada 2 defende o topo.
+          </p>
+          <button id="airhockey-start-btn" onclick="startAirHockeyGame(airHockeyMode)" class="mt-3 sketch-btn bg-amber-400 hover:bg-amber-500 text-red-950 font-bold text-xs px-4 py-2 rounded-xl shadow">
+            Iniciar Partida ⚡
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center text-[11px] text-pencil/70 px-1">
+        <span id="airhockey-hint-txt">Multi-touch ativo: joguem juntos na mesma tela!</span>
+        <button onclick="startAirHockeyGame(airHockeyMode)" class="sketch-btn bg-stone-100 hover:bg-stone-200 px-2 py-0.5 rounded-lg font-bold text-[10px]">
+          Reiniciar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PULA-PULA SPUTNIK NAS NUVENS -->
+  <div id="skyhop-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#fff8ed] max-w-sm w-full p-4 rounded-3xl sketch-border space-y-3 text-center shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pencil/20 pb-1">
+        <h3 class="font-caveat text-2xl font-bold text-red-950">Pula-Pula Sputnik nas Nuvens 🚀☁️</h3>
+        <button onclick="closeSkyHopModal()" class="text-xl font-bold">&times;</button>
+      </div>
+      <p class="text-xs text-pencil/70">Toque nas laterais para guiar o Camarada Cosmonauta rumo ao espaço!</p>
+
+      <div id="skyhop-canvas-container" class="w-full h-72 bg-gradient-to-b from-[#7f1d1d] via-[#b91c1c] to-[#fde68a] rounded-2xl border-2 border-pencil relative overflow-hidden select-none cursor-pointer touch-none">
+        <canvas id="skyhop-canvas" class="w-full h-full block"></canvas>
+      </div>
+
+      <div class="flex justify-between items-center text-xs font-bold px-2">
+        <span>Altitude: <span id="skyhop-score" class="text-base text-red-800 font-black">0</span></span>
+        <button onclick="startSkyHopGame()" class="sketch-btn bg-red-700 hover:bg-red-800 px-3.5 py-1.5 rounded-xl font-bold text-amber-200 shadow">
+          Lançar Sputnik 🚀
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELEGRAMAS DO COMITÊ CENTRAL (CARTAS) -->
+  <div id="letter-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#fff8ed] max-w-lg w-full rounded-3xl sketch-border flex flex-col h-[85vh] max-h-[620px] shadow-2xl overflow-hidden relative">
+      <div class="bg-[#f9e8cf] border-b-2 border-pencil p-3.5 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-full bg-red-700 border-2 border-pencil flex items-center justify-center text-xl text-amber-300 shadow-sm">
+            💌
+          </div>
+          <div>
+            <h3 class="font-caveat text-2xl font-bold text-red-950 leading-tight">Telegramas do Comitê Central 💌</h3>
+            <p class="text-[11px] text-pencil/80 flex items-center gap-1 font-medium">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping inline-block"></span>
+              Despachos oficiais de amor proletário
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="switchToFloatingChat()" title="Rádio Pravda com os Camaradas na tela" 
+                  class="sketch-btn bg-amber-200 hover:bg-amber-300 text-xs px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 text-red-950">
+            <span>📻</span>
+            <span class="hidden sm:inline">Rádio Pravda</span>
+          </button>
+          <button onclick="closeLetterModal()" class="w-8 h-8 rounded-full border-2 border-pencil flex items-center justify-center text-base font-bold bg-white hover:bg-red-50 active:scale-95 transition-transform">
+            &times;
+          </button>
+        </div>
+      </div>
+
+      <div id="chat-messages-container" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 chat-scroll bg-gradient-to-b from-[#fffaf2] to-[#f4e3c8]"></div>
+
+      <div class="bg-[#f9e8cf] border-t-2 border-pencil p-2.5 sm:p-3 flex-shrink-0 flex flex-col gap-1.5">
+        <div class="flex items-center gap-2">
+          <input type="text" id="chat-input-text" maxlength="160" placeholder="Redija um telegrama revolucionário pro seu Camarada..."
+                 class="flex-1 bg-white border-2 border-pencil rounded-2xl px-3.5 py-2 text-xs sm:text-sm font-hand text-pencil focus:outline-none focus:ring-2 focus:ring-red-500">
+          <button onclick="sendLoveLetter()" id="chat-send-btn" 
+                  class="sketch-btn bg-red-700 hover:bg-red-800 text-amber-200 font-bold text-xs sm:text-sm px-4 py-2 rounded-2xl flex items-center gap-1 shadow whitespace-nowrap">
+            <span>Despachar</span>
+            <span>☭</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/01-svg-gatos.js"></script>
+
+  <script type="module">
+/* 2. PERSISTÊNCIA HIPER-ECONÔMICA NO FIRESTORE TESTE */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { 
+      initializeFirestore, 
+      doc, 
+      setDoc, 
+      onSnapshot,
+      setLogLevel
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    try { setLogLevel('silent'); } catch(e) {}
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQKozcgf4N70cxUiUGJekGcUTClU2Httg",
+      authDomain: "jardim-gatos-teste.firebaseapp.com",
+      projectId: "jardim-gatos-teste",
+      storageBucket: "jardim-gatos-teste.firebasestorage.app",
+      messagingSenderId: "257294626705",
+      appId: "1:257294626705:web:130481b8778d8a9eceb430",
+      measurementId: "G-87FZWZWHXX"
+    };
+
+    const appId = "jardim-dos-gatos-casal";
+    const fixedRoomId = "ninho_de_amor_fixo";
+    let firstLettersSnapshot = true;
+
+    let savedRole = localStorage.getItem('casal_meu_gatinho') || 'cat1';
+    let myDeviceId = localStorage.getItem('casal_device_id');
+    if (!myDeviceId) {
+      myDeviceId = 'dev_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+      localStorage.setItem('casal_device_id', myDeviceId);
+    }
+    window.myDeviceId = myDeviceId;
+
+    const defaultState = {
+      roomId: fixedRoomId,
+      myRole: savedRole,
+      roomPassword: '',
+      loveScore: 85,
+      lastStatsUpdateTime: Date.now(),
+      nicknames: {
+        cat1: 'Camarada 1',
+        cat2: 'Camarada 2'
+      },
+      streak: {
+        current: 1,
+        best: 1,
+        totalDays: 1,
+        lastDailyDate: new Date().toDateString()
+      },
+      scores: {
+        cat1Wins: 0,
+        cat2Wins: 0,
+        ties: 0
+      },
+      presence: {
+        dailyKey: 'AMOR-CAT-2026',
+        syncedToday: false,
+        lastSyncedDate: ''
+      },
+      onlineRooms: {
+        jokenpo: {
+          p1InRoom: false,
+          p2InRoom: false,
+          p1Choice: '',
+          p2Choice: '',
+          state: 'waiting',
+          winner: '',
+          round: 1
+        },
+        reaction: {
+          p1InRoom: false,
+          p2InRoom: false,
+          state: 'idle',
+          targetTime: 0,
+          winner: '',
+          round: 1
+        },
+        tictactoe: {
+          p1InRoom: false,
+          p2InRoom: false,
+          board: Array(9).fill(''),
+          turn: 'cat1',
+          winner: ''
+        }
+      },
+      tictactoe: {
+        board: Array(9).fill(''),
+        turn: 'cat1',
+        winner: ''
+      },
+      wallets: {
+        cat1: { fish: 0, paws: 0, coupleCoins: 0 },
+        cat2: { fish: 0, paws: 0, coupleCoins: 0 }
+      },
+      // Novo jogo começa sem alimentos no inventário.
+      inventories: {
+        cat1: {},
+        cat2: {}
+      },
+      unlockedItems: {
+        cat1: ["acc_none", "acc_star", "outfit_none", "outfit_red_dress", "outfit_red_gown", "outfit_red_sweater", "outfit_red_hoodie", "outfit_red_overalls", "outfit_red_cape", "breed_white", "mouth_cat", "pupil_round", "shape_almond"],
+        cat2: ["acc_none", "acc_star", "outfit_none", "outfit_red_dress", "outfit_red_gown", "outfit_red_sweater", "outfit_red_hoodie", "outfit_red_overalls", "outfit_red_cape", "breed_white", "mouth_cat", "pupil_round", "shape_almond"]
+      },
+      lastRewardDates: { cat1: '', cat2: '' },
+      cat1: {
+        breed: 'white',
+        outfit: 'none',
+        outfitColor: '#e63946',
+        accessory: 'none',
+        accessoryColor: '#e76f51',
+        expression: 'happy',
+        eyeShape: 'almond',
+        eyeColor: '#2b2725',
+        pupil: 'round',
+        pupilColor: '#ffffff',
+        mouth: 'cat',
+        hunger: 80,
+        energy: 85,
+        happiness: 90,
+        speech: 'Ronronando baixinho... 🐾'
+      },
+      cat2: {
+        breed: 'white',
+        outfit: 'none',
+        outfitColor: '#e63946',
+        accessory: 'none',
+        accessoryColor: '#e76f51',
+        expression: 'happy',
+        eyeShape: 'almond',
+        eyeColor: '#2b2725',
+        pupil: 'round',
+        pupilColor: '#ffffff',
+        mouth: 'cat',
+        hunger: 80,
+        energy: 85,
+        happiness: 90,
+        speech: 'Ronronando baixinho... 🐾'
+      },
+      letters: []
+    };
+
+    const KNOWN_FOOD_IDS = ['food_bread', 'food_milk', 'food_salmon', 'food_starfruit', 'food_steak', 'food_potion'];
+
+    function sanitizeInventory(invObj) {
+      if (!invObj || typeof invObj !== 'object') return {};
+      const clean = {};
+      Object.keys(invObj).forEach(k => {
+        const qty = Number(invObj[k]);
+        if (!isNaN(qty) && qty > 0) clean[k] = qty;
+      });
+      return clean;
+    }
+    window.sanitizeInventory = sanitizeInventory;
+
+    function buildInventoryPayload(invObj) {
+      const payload = {};
+      const clean = sanitizeInventory(invObj);
+      KNOWN_FOOD_IDS.forEach(foodId => {
+        payload[foodId] = clean[foodId] !== undefined ? clean[foodId] : 0;
+      });
+      return payload;
+    }
+    window.buildInventoryPayload = buildInventoryPayload;
+
+    function applyFastOfflineDecay() {
+      const state = window.sharedState;
+      if (!state) return;
+      const now = Date.now();
+      const lastUpdate = state.lastStatsUpdateTime || now;
+      const elapsedMinutes = Math.floor((now - lastUpdate) / (1000 * 60));
+
+      if (elapsedMinutes >= 1) {
+        const hungerLoss = Math.floor(elapsedMinutes / 3);
+        const happyLoss = Math.floor(elapsedMinutes / 5);
+        const energyLoss = Math.floor(elapsedMinutes / 6);
+
+        if (hungerLoss > 0 || happyLoss > 0) {
+          ['cat1', 'cat2'].forEach(k => {
+            if (state[k]) {
+              state[k].hunger = Math.max(5, (state[k].hunger || 50) - hungerLoss);
+              state[k].happiness = Math.max(5, (state[k].happiness || 50) - happyLoss);
+              state[k].energy = Math.max(10, (state[k].energy || 50) - energyLoss);
+              if (state[k].hunger <= 25) {
+                state[k].speech = 'Camarada, preciso de ração estatal... 🐟🥺';
+              }
+            }
+          });
+          state.lastStatsUpdateTime = now;
+          if (typeof window.saveStateToCloud === 'function') window.saveStateToCloud();
+        }
+      }
+    }
+    window.applyFastOfflineDecay = applyFastOfflineDecay;
+
+    function loadLocalStateCache() {
+      try {
+        const cachedRaw = localStorage.getItem('casal_shared_state_cache');
+        if (cachedRaw) {
+          const cached = JSON.parse(cachedRaw);
+          return {
+            ...defaultState,
+            ...cached,
+            myRole: savedRole,
+            onlineRooms: { ...defaultState.onlineRooms, ...(cached.onlineRooms || {}) },
+            wallets: { ...defaultState.wallets, ...(cached.wallets || {}) },
+            inventories: {
+              cat1: sanitizeInventory(cached.inventories?.cat1 !== undefined ? cached.inventories.cat1 : defaultState.inventories.cat1),
+              cat2: sanitizeInventory(cached.inventories?.cat2 !== undefined ? cached.inventories.cat2 : defaultState.inventories.cat2)
+            },
+            cat1: { ...defaultState.cat1, ...(cached.cat1 || {}) },
+            cat2: { ...defaultState.cat2, ...(cached.cat2 || {}) },
+            letters: Array.isArray(cached.letters) ? cached.letters : []
+          };
+        }
+      } catch (e) {}
+      return { ...defaultState };
+    }
+
+    window.sharedState = loadLocalStateCache();
+
+    window.saveStateToLocalCache = function() {
+      try {
+        localStorage.setItem('casal_shared_state_cache', JSON.stringify(window.sharedState));
+      } catch(e) {}
+    };
+
+    window.getMyWallet = function() {
+      const role = window.sharedState.myRole || 'cat1';
+      if (!window.sharedState.wallets) window.sharedState.wallets = {};
+      if (!window.sharedState.wallets[role]) window.sharedState.wallets[role] = { fish: 0, paws: 0, coupleCoins: 0 };
+      return window.sharedState.wallets[role];
+    };
+
+    window.getMyInventory = function() {
+      const role = window.sharedState.myRole || 'cat1';
+      if (!window.sharedState.inventories) window.sharedState.inventories = {};
+      window.sharedState.inventories[role] = sanitizeInventory(window.sharedState.inventories[role]);
+      return window.sharedState.inventories[role];
+    };
+
+    window.getMyUnlockedItems = function() {
+      const role = window.sharedState.myRole || 'cat1';
+      if (!window.sharedState.unlockedItems) window.sharedState.unlockedItems = {};
+      if (!window.sharedState.unlockedItems[role]) {
+        window.sharedState.unlockedItems[role] = ["acc_none", "acc_star", "outfit_none", "outfit_red_dress", "outfit_red_gown", "outfit_red_sweater", "outfit_red_hoodie", "outfit_red_overalls", "outfit_red_cape", "breed_white", "mouth_cat", "pupil_round", "shape_almond"];
+      }
+      return window.sharedState.unlockedItems[role];
+    };
+
+    let db = null;
+    async function initFirebaseSync() {
+      const statusText = document.getElementById('cloud-sync-status-text');
+      const statusDot = document.getElementById('cloud-sync-status-dot');
+
+      try {
+        const app = initializeApp(firebaseConfig);
+        db = initializeFirestore(app, {
+          experimentalAutoDetectLongPolling: true,
+          ignoreUndefinedProperties: true
+        });
+
+        try {
+          const auth = getAuth(app);
+          await signInAnonymously(auth);
+        } catch(e) {}
+
+        const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', fixedRoomId);
+
+        onSnapshot(roomRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+
+            // Notifica apenas cartas novas recebidas depois da primeira sincronização.
+            const incomingLetters = firstLettersSnapshot
+              ? []
+              : (Array.isArray(data.letters) ? data.letters : []).filter(letter =>
+                  letter && letter.from && letter.from !== (window.sharedState?.myRole || savedRole) &&
+                  !(window.sharedState?.letters || []).some(old => String(old.id) === String(letter.id))
+                );
+            firstLettersSnapshot = false;
+
+            window.sharedState = {
+              ...window.sharedState,
+              ...data,
+              myRole: window.sharedState.myRole,
+              onlineRooms: {
+                jokenpo: { ...defaultState.onlineRooms.jokenpo, ...(data.onlineRooms?.jokenpo || {}) },
+                reaction: { ...defaultState.onlineRooms.reaction, ...(data.onlineRooms?.reaction || {}) },
+                tictactoe: { ...defaultState.onlineRooms.tictactoe, ...(data.onlineRooms?.tictactoe || {}) }
+              },
+              wallets: {
+                cat1: { ...window.sharedState.wallets.cat1, ...(data.wallets?.cat1 || {}) },
+                cat2: { ...window.sharedState.wallets.cat2, ...(data.wallets?.cat2 || {}) }
+              },
+              inventories: {
+                cat1: sanitizeInventory(data.inventories?.cat1 !== undefined ? data.inventories.cat1 : window.sharedState.inventories.cat1),
+                cat2: sanitizeInventory(data.inventories?.cat2 !== undefined ? data.inventories.cat2 : window.sharedState.inventories.cat2)
+              },
+              cat1: { ...window.sharedState.cat1, ...(data.cat1 || {}) },
+              cat2: { ...window.sharedState.cat2, ...(data.cat2 || {}) },
+              letters: Array.isArray(data.letters) ? data.letters : (window.sharedState.letters || [])
+            };
+
+            applyFastOfflineDecay();
+            window.saveStateToLocalCache();
+            if (statusText) statusText.innerText = "Satélite Sputnik Conectado ☁️";
+            if (statusDot) statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 inline-block";
+
+            if (typeof window.renderFullState === 'function') window.renderFullState();
+            if (typeof window.syncOnlineGameLobbies === 'function') window.syncOnlineGameLobbies();
+            if (typeof window.renderTicTacToeBoard === 'function') window.renderTicTacToeBoard();
+            if (typeof window.renderBackpackSlots === 'function') window.renderBackpackSlots();
+            if (typeof window.updateWalletHeader === 'function') window.updateWalletHeader();
+            if (typeof window.renderLetterHistory === 'function') window.renderLetterHistory();
+            if (typeof window.updateFloatingPreviewText === 'function') window.updateFloatingPreviewText();
+            incomingLetters.forEach(letter => {
+              if (typeof window.notifyIncomingLetter === 'function') window.notifyIncomingLetter(letter);
+            });
+          } else {
+            window.saveStateToCloud(true);
+          }
+        }, (err) => {
+          if (statusText) statusText.innerText = "Bunker Local Seguro 🛡️";
+          if (statusDot) statusDot.className = "w-2 h-2 rounded-full bg-amber-500 inline-block";
+        });
+      } catch(err) {
+        if (statusText) statusText.innerText = "Bunker Local Seguro 🛡️";
+      }
+    }
+
+    let cloudSaveTimeout = null;
+    window.saveStateToCloud = function(immediate = false) {
+      if (typeof window.renderFullState === 'function') window.renderFullState();
+      if (typeof window.updateWalletHeader === 'function') window.updateWalletHeader();
+      window.saveStateToLocalCache();
+
+      if (!db) return;
+      if (immediate) {
+        if (cloudSaveTimeout) clearTimeout(cloudSaveTimeout);
+        executeCloudSave();
+      } else {
+        if (!cloudSaveTimeout) {
+          cloudSaveTimeout = setTimeout(() => {
+            cloudSaveTimeout = null;
+            executeCloudSave();
+          }, 1200);
+        }
+      }
+    };
+
+    async function executeCloudSave() {
+      if (!db) return;
+      try {
+        const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', fixedRoomId);
+        await setDoc(roomRef, {
+          roomPassword: window.sharedState.roomPassword || '',
+          cat1: window.sharedState.cat1,
+          cat2: window.sharedState.cat2,
+          loveScore: window.sharedState.loveScore,
+          nicknames: window.sharedState.nicknames,
+          streak: window.sharedState.streak,
+          scores: window.sharedState.scores,
+          presence: window.sharedState.presence,
+          onlineRooms: window.sharedState.onlineRooms,
+          tictactoe: window.sharedState.tictactoe,
+          wallets: window.sharedState.wallets,
+          inventories: {
+            cat1: buildInventoryPayload(window.sharedState.inventories?.cat1),
+            cat2: buildInventoryPayload(window.sharedState.inventories?.cat2)
+          },
+          unlockedItems: window.sharedState.unlockedItems,
+          lastRewardDates: window.sharedState.lastRewardDates || {},
+          letters: window.sharedState.letters || [],
+          lastStatsUpdateTime: window.sharedState.lastStatsUpdateTime || Date.now(),
+          updatedAt: Date.now()
+        }, { merge: true });
+      } catch(e) {}
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      applyFastOfflineDecay();
+      if (typeof window.updateWalletHeader === 'function') window.updateWalletHeader();
+      if (typeof window.renderFullState === 'function') window.renderFullState();
+      if (typeof window.renderBackpackSlots === 'function') window.renderBackpackSlots();
+      if (typeof window.checkStreakProgress === 'function') window.checkStreakProgress();
+      if (typeof window.renderLetterHistory === 'function') window.renderLetterHistory();
+      if (typeof window.updateFloatingPreviewText === 'function') window.updateFloatingPreviewText();
+
+      initFirebaseSync();
+
+      const authToken = localStorage.getItem('casal_auth_token');
+      if (!authToken) {
+        if (typeof window.openLoginModal === 'function') window.openLoginModal();
+      }
+
+      const chatInput = document.getElementById('chat-input-text');
+      if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            sendLoveLetter();
+          }
+        });
+      }
+
+      const floatingInput = document.getElementById('floating-chat-input');
+      if (floatingInput) {
+        floatingInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            sendLoveLetterFromFloating();
+          }
+        });
+      }
+    });
+  </script>
+
+  <script src="assets/js/03-estado-e-carteiras.js"></script>
+
+  <script src="assets/js/04-loja-e-atelie.js"></script>
+
+  <script src="assets/js/05-salas-online.js"></script>
+
+  <script src="assets/js/06-jokenpo.js"></script>
+
+  <script src="assets/js/07-jogos-coletivos.js"></script>
+
+  <script src="assets/js/08-air-hockey.js"></script>
+
+  <script src="assets/js/09-xadrez-e-damas.js"></script>
+</body>
+</html>

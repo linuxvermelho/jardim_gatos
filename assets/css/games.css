@@ -1,0 +1,18 @@
+body { font-family: 'Quicksand', sans-serif; background-color: #7f1d1d; color: #2b1111; user-select: none; }
+    .sketch-border { border: 2.5px solid #2b1111; box-shadow: 3px 4px 0 rgba(43,17,17,0.9); }
+    .sketch-btn { border: 2px solid #2b1111; box-shadow: 2px 3px 0 rgba(43,17,17,0.95); transition: all 0.15s; }
+    .sketch-btn:active { transform: translate(2px, 2px); box-shadow: 0 1px 0 rgba(43,17,17,0.95); }
+    @keyframes idlePurr { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.03); } }
+    @keyframes catPoof { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4) rotate(15deg); opacity: 0.7; } 100% { transform: scale(0.1); opacity: 0; } }
+    @keyframes catAttack { 0% { transform: scale(0.9); } 50% { transform: scale(1.18) rotate(6deg); } 100% { transform: scale(1); } }
+    .anim-idle { animation: idlePurr 2.8s ease-in-out infinite; }
+    .anim-poof { animation: catPoof 0.4s forwards; }
+    .anim-attack { animation: catAttack 0.35s ease-out; }
+    .square-light { background-color: #fff8ed; }
+    .square-dark { background-color: #991b1b; }
+    .square-selected { background-color: #fde047 !important; box-shadow: inset 0 0 10px #b45309; }
+    .square-valid-move { position: relative; }
+    .square-valid-move::after { content: ''; position: absolute; width: 14px; height: 14px; background: rgba(251, 191, 36, 0.85); border-radius: 50%; pointer-events: none; border: 1.5px solid #2b1111; }
+    .square-valid-capture::after { content: ''; position: absolute; width: 26px; height: 26px; border: 3px dashed #fde047; border-radius: 50%; pointer-events: none; }
+    .chat-scroll::-webkit-scrollbar { width: 5px; }
+    .chat-scroll::-webkit-scrollbar-thumb { background: #b91c1c; border-radius: 6px; }
